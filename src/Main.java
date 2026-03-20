@@ -1,15 +1,13 @@
 import java.util.*;
 
-// Reservation class (with ID added for mapping)
+// Represents a reservation (already confirmed from previous use case)
 class Reservation {
     private String reservationId;
     private String guestName;
-    private String roomType;
 
-    public Reservation(String reservationId, String guestName, String roomType) {
+    public Reservation(String reservationId, String guestName) {
         this.reservationId = reservationId;
         this.guestName = guestName;
-        this.roomType = roomType;
     }
 
     public String getReservationId() {
@@ -19,31 +17,20 @@ class Reservation {
     public String getGuestName() {
         return guestName;
     }
-
-    public String getRoomType() {
-        return roomType;
-    }
-
-    @Override
-    public String toString() {
-        return "Reservation [ID=" + reservationId +
-                ", Guest=" + guestName +
-                ", RoomType=" + roomType + "]";
-    }
 }
 
-// Add-On Service class
-class AddOnService {
-    private String serviceName;
+// Represents an add-on service
+class Service {
+    private String name;
     private double cost;
 
-    public AddOnService(String serviceName, double cost) {
-        this.serviceName = serviceName;
+    public Service(String name, double cost) {
+        this.name = name;
         this.cost = cost;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public String getName() {
+        return name;
     }
 
     public double getCost() {
@@ -52,85 +39,85 @@ class AddOnService {
 
     @Override
     public String toString() {
-        return serviceName + " (₹" + cost + ")";
+        return name + " (₹" + cost + ")";
     }
 }
 
-// Add-On Service Manager
+// Manages add-on services
 class AddOnServiceManager {
 
     // Map: Reservation ID -> List of Services
-    private Map<String, List<AddOnService>> serviceMap = new HashMap<>();
+    private Map<String, List<Service>> serviceMap = new HashMap<>();
 
     // Add service to reservation
-    public void addService(String reservationId, AddOnService service) {
+    public void addService(String reservationId, Service service) {
         serviceMap
                 .computeIfAbsent(reservationId, k -> new ArrayList<>())
                 .add(service);
 
-        System.out.println("Added service: " + service + " to Reservation ID: " + reservationId);
+        System.out.println("Service added to " + reservationId + ": " + service);
     }
 
     // View services for a reservation
     public void viewServices(String reservationId) {
-        List<AddOnService> services = serviceMap.get(reservationId);
+        List<Service> services = serviceMap.get(reservationId);
 
         if (services == null || services.isEmpty()) {
-            System.out.println("No add-on services for Reservation ID: " + reservationId);
+            System.out.println("No services for Reservation ID: " + reservationId);
             return;
         }
 
         System.out.println("\nServices for Reservation ID: " + reservationId);
-        for (AddOnService s : services) {
+        for (Service s : services) {
             System.out.println("- " + s);
         }
     }
 
-    // Calculate total cost of services
+    // Calculate total service cost
     public double calculateTotalCost(String reservationId) {
-        List<AddOnService> services = serviceMap.get(reservationId);
+        List<Service> services = serviceMap.get(reservationId);
 
-        if (services == null) return 0.0;
+        if (services == null) return 0;
 
         double total = 0;
-        for (AddOnService s : services) {
+        for (Service s : services) {
             total += s.getCost();
         }
         return total;
     }
 }
 
-// Main Class
+// Main class
 public class Main {
 
     public static void main(String[] args) {
 
-        // Sample reservations (already confirmed in Use Case 6)
-        Reservation r1 = new Reservation("RES-101", "Alice", "Deluxe");
-        Reservation r2 = new Reservation("RES-102", "Bob", "Standard");
+        // Sample reservations
+        Reservation r1 = new Reservation("RES101", "Alice");
+        Reservation r2 = new Reservation("RES102", "Bob");
 
-        AddOnServiceManager serviceManager = new AddOnServiceManager();
+        // Service manager
+        AddOnServiceManager manager = new AddOnServiceManager();
 
-        // Define services
-        AddOnService breakfast = new AddOnService("Breakfast", 500);
-        AddOnService airportPickup = new AddOnService("Airport Pickup", 1200);
-        AddOnService spa = new AddOnService("Spa Access", 2000);
+        // Create services
+        Service breakfast = new Service("Breakfast", 500);
+        Service spa = new Service("Spa", 1500);
+        Service pickup = new Service("Airport Pickup", 1000);
 
-        // Guest selects services
-        serviceManager.addService(r1.getReservationId(), breakfast);
-        serviceManager.addService(r1.getReservationId(), spa);
-
-        serviceManager.addService(r2.getReservationId(), airportPickup);
+        // Add services to reservations
+        manager.addService(r1.getReservationId(), breakfast);
+        manager.addService(r1.getReservationId(), spa);
+        manager.addService(r2.getReservationId(), pickup);
 
         // View services
-        serviceManager.viewServices(r1.getReservationId());
-        serviceManager.viewServices(r2.getReservationId());
+        manager.viewServices(r1.getReservationId());
+        manager.viewServices(r2.getReservationId());
 
-        // Calculate cost
-        System.out.println("\nTotal Add-On Cost for " + r1.getReservationId() +
-                ": ₹" + serviceManager.calculateTotalCost(r1.getReservationId()));
+        // Calculate total cost
+        System.out.println("\nTotal cost for " + r1.getReservationId() +
+                ": ₹" + manager.calculateTotalCost(r1.getReservationId()));
 
-        System.out.println("Total Add-On Cost for " + r2.getReservationId() +
-                ": ₹" + serviceManager.calculateTotalCost(r2.getReservationId()));
+        System.out.println("Total cost for " + r2.getReservationId() +
+                ": ₹" + manager.calculateTotalCost(r2.getReservationId()));
     }
 }
